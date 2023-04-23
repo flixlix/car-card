@@ -3,13 +3,15 @@
 /* eslint-disable no-nested-ternary */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import { HomeAssistant, LovelaceCardEditor } from "custom-card-helpers";
+import { HomeAssistant, LovelaceCardEditor, formatNumber } from "custom-card-helpers";
 import { html, LitElement, PropertyValues, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { CarCardConfig } from "./car-card-config";
 import { registerCustomCard } from "./utils/register-custom-card";
 import { styles } from "./style";
 import { getDefaultConfig } from "./utils/get-default-config";
+import { logError } from "./logging";
+import { isNumberValue, coerceNumber } from "./utils/utils";
 
 registerCustomCard({
   type: "car-card",
@@ -45,22 +47,59 @@ export class CarCard extends LitElement {
   public getCardSize(): Promise<number> | number {
     return 3;
   }
+  private unavailableOrMisconfiguredError = (entityId: string | undefined) =>
+    logError(`Entity "${entityId ?? "Unknown"}" is not available or misconfigured`);
+
+  private entityAvailable = (entityId: string): boolean => isNumberValue(this.hass.states[entityId]?.state);
+
+  private getEntityState = (entity?: string, showUnavailable?: boolean): number | string => {
+    if (!entity || !this.entityAvailable(entity)) {
+      this.unavailableOrMisconfiguredError(entity);
+      return showUnavailable ? "Unavailable" : 0;
+    }
+    return coerceNumber(this.hass.states[entity].state);
+  };
+
+  private displayValue = (entity: string) => {
+    const value = this.getEntityState(entity, true);
+    if (Number.isNaN(+value)) return value;
+    const unit = entity ? this.hass.states[entity]?.attributes?.unit_of_measurement : "%";
+    const formatted = formatNumber(value, this.hass.locale);
+    return `${formatted}${unit ? ` ${unit}` : ""}`;
+  };
 
   protected render(): TemplateResult {
+    const hasMainInfo = !!this._config?.main_info?.entity;
+    const mainInfoState = this.displayValue(this._config?.main_info?.entity);
+
+    const hasStateOfCharge = !!this._config?.state_of_charge?.entity;
+    const stateOfChargeState = this.displayValue(this._config?.state_of_charge?.entity);
+
+    const hasTargetStateOfCharge = !!this._config?.target_state_of_charge?.entity;
+
+    const hasRecommendedTarget = !!this._config?.target_state_of_charge?.recommended_target;
+
+    this.style.setProperty("--progress-bar-alert", `${100 - this._config?.target_state_of_charge.recommended_target ?? 0}%`);
+
+    this.style.setProperty("--image-max-height", `${this._config?.image?.max_height ?? 200}px`);
+
+    this.style.setProperty("--progress-bar-active", `${this.getEntityState(this._config?.state_of_charge?.entity)}%`);
+    this.style.setProperty("--progress-bar-target", `${this.getEntityState(this._config?.target_state_of_charge?.entity)}%`);
+
     return html`
       <ha-card .header=${this._config.title}>
         <div class="card-content">
           <div class="grid vertical" id="main-info-container">
-            ${!this._config?.main_info?.entity ? "" : html` <h1 id="main-info">${this._config.main_info.entity}</h1>`}
+            ${!hasMainInfo ? "" : html` <h1 id="main-info">${mainInfoState}</h1>`}
             ${!this._config?.image?.src ? "" : html` <img src=${this._config.image.src} width="100%" alt="Your Car" id="main-image" />`}
             ${
-              !this._config?.state_of_charge?.entity
+              !hasStateOfCharge
                 ? ""
                 : html` <div class="grid vertical">
                     <div class="flex charge-actions-container">
                       <div class="grid vertical">
                         <p id="state-of-charge-label">State of Charge</p>
-                        <p id="state-of-charge">${this._config.state_of_charge.entity}</p>
+                        <p id="state-of-charge">${stateOfChargeState}</p>
                       </div>
                       <div class="grid vertical" id="icon-buttons-container">
                         <ha-icon icon="mdi:speedometer-slow" class="icon-button"></ha-icon>
@@ -69,9 +108,9 @@ export class CarCard extends LitElement {
                     </div>
                     <div id="progress-bar">
                       <div id="progress-bar-inactive"></div>
+                      ${hasRecommendedTarget ? html`<div id="progress-bar-alert"></div>` : ""}
                       <div id="progress-bar-active"></div>
-                      <div id="progress-bar-alert"></div>
-                      <div id="progress-bar-marker"></div>
+                      ${hasTargetStateOfCharge ? html`<div id="progress-bar-target"></div>` : ""}
                     </div>
                   </div>`
             }

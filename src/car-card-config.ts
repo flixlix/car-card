@@ -9,9 +9,10 @@ export interface CarCardConfig extends LovelaceCardConfig {
   };
   target_state_of_charge: {
     entity: string;
+    recommended_target: number;
   };
   image: {
     src: string;
-    height: number;
+    max_height: number;
   };
 }

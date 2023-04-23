@@ -1,6 +1,13 @@
 import { css } from "lit";
 
 export const styles = css`
+  :host {
+    --image-max-height: 200px;
+    --progress-bar-active: 0%;
+    --progress-bar-target: 100%;
+    --progress-bar-alert: 0%;
+  }
+
   .grid {
     display: grid;
   }
@@ -30,7 +37,7 @@ export const styles = css`
 
   #main-image {
     width: 100%;
-    max-height: 200px;
+    max-height: var(--image-max-height);
     object-fit: contain;
     margin: 0 auto;
   }
@@ -74,7 +81,7 @@ export const styles = css`
     top: 0;
     left: 0;
     background-color: var(--primary-color);
-    width: 80%;
+    width: calc(100% - var(--progress-bar-alert));
     height: 100%;
     opacity: 0.3;
     border-radius: 9999px 0 0 9999px;
@@ -85,7 +92,8 @@ export const styles = css`
     top: 0;
     left: 0;
     background-color: var(--primary-color);
-    width: 50%;
+    width: var(--progress-bar-active);
+    transition: width 0.5s ease-in-out;
     height: 100%;
     border-radius: inherit;
   }
@@ -96,18 +104,19 @@ export const styles = css`
     right: 0;
     background-color: var(--error-color);
     opacity: 0.3;
-    width: 20%;
+    width: var(--progress-bar-alert);
     height: 100%;
     border-radius: 0 9999px 9999px 0;
   }
 
-  #progress-bar-marker {
+  #progress-bar-target {
+    transition: left 0.5s ease-in-out;
     position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--primary-color);
+    top: 50%;
+    left: var(--progress-bar-target);
+    transform: translate(-50%, -50%);
+    background-color: var(--secondary-text-color);
     width: 2px;
-    height: 100%;
+    height: 600%;
   }
 `;
