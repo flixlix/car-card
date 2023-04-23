@@ -1,3 +1,6 @@
+# Package lock files (npm & yarn)
+package-lock.json
+
 # Logs
 logs
 *.log
