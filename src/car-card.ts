@@ -12,6 +12,7 @@ import { styles } from "./style";
 import { getDefaultConfig } from "./utils/get-default-config";
 import { logError } from "./logging";
 import { isNumberValue, coerceNumber } from "./utils/utils";
+import { getTimeLeftUntil } from "./utils/get-time-left-until";
 
 registerCustomCard({
   type: "car-card",
@@ -60,7 +61,7 @@ export class CarCard extends LitElement {
     return coerceNumber(this.hass.states[entity].state);
   };
 
-  private displayValue = (entity: string) => {
+  private displayValue = (entity?: string) => {
     const value = this.getEntityState(entity, true);
     if (Number.isNaN(+value)) return value;
     const unit = entity ? this.hass.states[entity]?.attributes?.unit_of_measurement : "%";
@@ -68,67 +69,93 @@ export class CarCard extends LitElement {
     return `${formatted}${unit ? ` ${unit}` : ""}`;
   };
 
+  private getTimeLeftCharge = (entity?: string) => {
+    const dateTimeFinishedState = entity && this.hass.states[entity].state;
+    const timeLeftCharge = entity && getTimeLeftUntil(dateTimeFinishedState);
+    return timeLeftCharge;
+  };
+
   protected render(): TemplateResult {
-    const hasMainInfo = !!this._config?.main_info?.entity;
-    const mainInfoState = this.displayValue(this._config?.main_info?.entity);
+    const { fields } = this._config;
+    const hasMainInfo = !!fields?.main?.heading?.entity;
+    const mainInfoState = this.displayValue(fields?.main?.heading?.entity);
 
-    const hasStateOfCharge = !!this._config?.state_of_charge?.entity;
-    const stateOfChargeState = this.displayValue(this._config?.state_of_charge?.entity);
+    const hasStateOfCharge = !!fields?.battery?.state_of_charge?.entity;
+    const stateOfChargeState = this.displayValue(fields?.battery?.state_of_charge?.entity);
 
-    const hasTargetStateOfCharge = !!this._config?.target_state_of_charge?.entity;
+    const hasTargetStateOfCharge = !!fields?.battery?.target_state_of_charge?.entity;
 
-    const hasRecommendedTarget = !!this._config?.target_state_of_charge?.recommended_target;
+    const hasRecommendedTarget = !!fields?.battery?.recommended_target;
 
-    this.style.setProperty("--progress-bar-alert", `${100 - this._config?.target_state_of_charge.recommended_target ?? 0}%`);
+    const timeLeftCharge = this.getTimeLeftCharge(fields?.charging?.datetime_finished?.entity);
+
+    const isCharging =
+      fields?.charging?.state?.entity &&
+      this.hass.states[fields?.charging?.state?.entity].state === (fields?.charging?.state?.state_charging || "on");
+
+    this.style.setProperty("--progress-bar-alert", `${100 - (fields?.battery?.recommended_target || 0) ?? 0}%`);
 
     this.style.setProperty("--image-max-height", `${this._config?.image?.max_height ?? 200}px`);
-
-    this.style.setProperty("--progress-bar-active", `${this.getEntityState(this._config?.state_of_charge?.entity)}%`);
-    this.style.setProperty("--progress-bar-target", `${this.getEntityState(this._config?.target_state_of_charge?.entity)}%`);
+    this.style.setProperty("--progress-bar-target", `${this.getEntityState(fields?.battery?.target_state_of_charge?.entity)}%`);
+    this.style.setProperty("--progress-bar-active", `${this.getEntityState(fields?.battery?.state_of_charge?.entity)}%`);
+    this.style.setProperty("--charging-icon-color", isCharging ? "var(--primary-color)" : "var(--secondary-text-color)");
 
     return html`
       <ha-card .header=${this._config.title}>
-        <div class="card-content">
+        <div class="flex vertical card-content">
           <div class="grid vertical" id="main-info-container">
             ${!hasMainInfo ? "" : html` <h1 id="main-info">${mainInfoState}</h1>`}
-            ${!this._config?.image?.src ? "" : html` <img src=${this._config.image.src} width="100%" alt="Your Car" id="main-image" />`}
-            ${
-              !hasStateOfCharge
-                ? ""
-                : html` <div class="grid vertical">
-                    <div class="flex charge-actions-container">
-                      <div class="grid vertical">
-                        <p id="state-of-charge-label">State of Charge</p>
-                        <p id="state-of-charge">${stateOfChargeState}</p>
-                      </div>
-                      <div class="grid vertical" id="icon-buttons-container">
-                        <ha-icon icon="mdi:speedometer-slow" class="icon-button"></ha-icon>
-                        <ha-icon icon="mdi:target" class="icon-button"></ha-icon>
-                      </div>
-                    </div>
-                    <div id="progress-bar">
-                      <div id="progress-bar-inactive"></div>
-                      ${hasRecommendedTarget ? html`<div id="progress-bar-alert"></div>` : ""}
-                      <div id="progress-bar-active"></div>
-                      ${hasTargetStateOfCharge ? html`<div id="progress-bar-target"></div>` : ""}
-                    </div>
-                  </div>`
-            }
-        </div>
-        ${
-          this._config.dashboard_link
-            ? html`
-                <div class="card-actions">
-                  <a href=${this._config.dashboard_link}
-                    ><mwc-button>
-                      ${this._config.dashboard_link_label ||
-                      this.hass.localize("ui.panel.lovelace.cards.energy.energy_distribution.go_to_energy_dashboard")}
-                    </mwc-button></a
-                  >
+            <div class="flex main-info-subtitle-container">
+              <p class="main-info-subtitle">23.000 km</p>
+              <p class="main-info-subtitle">1,5 years</p>
+            </div>
+          </div>
+
+          ${!this._config?.image?.src ? "" : html` <img src=${this._config.image.src} width="100%" alt="Your Car" id="main-image" />`}
+          ${!isCharging
+            ? ""
+            : html`
+                <div class="flex horizontal">
+                  <div class="flex vertical" id="charging-text-container">
+                    <p class="label1">${isCharging ? "Charging" : "Not Charging"}</p>
+                    ${!isCharging ? "" : html`<p class="state1">${timeLeftCharge}</p>`}
+                  </div>
+                  <ha-icon icon="mdi:flash" id="charge-icon"></ha-icon>
                 </div>
-              `
-            : ""
-        }
+              `}
+          ${!hasStateOfCharge
+            ? ""
+            : html` <div class="grid vertical">
+                <div class="flex charge-actions-container">
+                  <div class="grid vertical">
+                    <p id="state-of-charge-label" class="label1">State of Charge</p>
+                    <p id="state-of-charge" class="state1">${stateOfChargeState}</p>
+                  </div>
+                  <div class="grid vertical" id="icon-buttons-container">
+                    <ha-icon icon="mdi:speedometer-slow" class="icon-button"></ha-icon>
+                    <ha-icon icon="mdi:target" class="icon-button"></ha-icon>
+                  </div>
+                </div>
+                <div id="progress-bar">
+                  <div id="progress-bar-inactive"></div>
+                  ${hasRecommendedTarget ? html`<div id="progress-bar-alert"></div>` : ""}
+                  <div id="progress-bar-active"></div>
+                  ${hasTargetStateOfCharge ? html`<div id="progress-bar-target"></div>` : ""}
+                </div>
+              </div>`}
+        </div>
+        ${this._config.dashboard_link
+          ? html`
+              <div class="card-actions">
+                <a href=${this._config.dashboard_link}
+                  ><mwc-button>
+                    ${this._config.dashboard_link_label ||
+                    this.hass.localize("ui.panel.lovelace.cards.energy.energy_distribution.go_to_energy_dashboard")}
+                  </mwc-button></a
+                >
+              </div>
+            `
+          : ""}
       </ha-card>
     `;
   }

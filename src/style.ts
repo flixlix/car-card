@@ -6,6 +6,11 @@ export const styles = css`
     --progress-bar-active: 0%;
     --progress-bar-target: 100%;
     --progress-bar-alert: 0%;
+    --charging-icon-color: var(--secondary-text-color);
+  }
+
+  .card-content {
+    gap: 20px;
   }
 
   .grid {
@@ -27,12 +32,32 @@ export const styles = css`
   }
   .flex.horizontal {
     flex-direction: row;
+    justify-content: space-between;
   }
 
   #main-info {
     text-align: center;
     font-weight: 300;
     font-size: 3rem;
+    display: inline-block;
+    width: fit-content;
+    margin: 0;
+  }
+
+  #main-info-container {
+    margin: 0 auto;
+    width: fit-content;
+  }
+
+  .main-info-subtitle-container {
+    justify-content: space-between;
+    margin: 0;
+    margin-top: 10px;
+  }
+
+  .main-info-subtitle {
+    margin: 0;
+    margin-top: 10px;
   }
 
   #main-image {
@@ -58,12 +83,18 @@ export const styles = css`
   }
 
   #state-of-charge-label {
+  }
+
+  .label1 {
     margin-top: 0;
-    font-size: 0.9rem;
     margin-bottom: 10px;
+    font-size: 0.9rem;
   }
 
   #state-of-charge {
+  }
+
+  .state1 {
     margin: 0;
     font-size: 1.5rem;
     font-weight: bold;
@@ -118,5 +149,19 @@ export const styles = css`
     background-color: var(--secondary-text-color);
     width: 2px;
     height: 600%;
+  }
+
+  #charge-icon {
+    color: var(--charging-icon-color);
+    --mdc-icon-size: 48px;
+  }
+
+  h4,
+  h6 {
+    margin: 0;
+  }
+
+  #charging-text-container {
+    justify-content: center;
   }
 `;
