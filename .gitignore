@@ -1,6 +1,10 @@
 # Package lock files (npm & yarn)
 package-lock.json
 
+# DS Store
+
+.DS_Store
+
 # Logs
 logs
 *.log
