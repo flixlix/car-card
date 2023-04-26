@@ -117,7 +117,7 @@ export class CarCard extends LitElement {
       <ha-card .header=${this._config.title}>
         <div class="flex vertical card-content">
           <div class="grid vertical" id="main-info-container">
-            ${!topInfo.main.has ? "" : html` <h1 id="main-info">${topInfo.main.has}</h1>`}
+            ${!topInfo.main.has ? "" : html` <h1 id="main-info">${topInfo.main.state}</h1>`}
             <div class="flex main-info-subtitle-container">
               ${!topInfo.subheading1.has ? "" : html` <p class="main-info-subtitle">${topInfo.subheading1.state}</p>`}
               ${!topInfo.subheading2.has ? "" : html` <p class="main-info-subtitle">${topInfo.subheading2.state}</p>`}
