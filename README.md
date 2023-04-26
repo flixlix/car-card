@@ -1,3 +1,7 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/flixlix/car-card?style=flat-square)
+![GitHub all releases](https://img.shields.io/github/downloads/flixlix/car-card/total?style=flat-square)
+[![ko-fi support](https://img.shields.io/badge/support-me-ff5e5b?style=flat-square&logo=ko-fi)](https://ko-fi.com/flixlix)
+![commit_activity](https://img.shields.io/github/commit-activity/y/flixlix/car-card?color=brightgreen&label=Commits&style=flat-square)
 
 # Car Card
 
