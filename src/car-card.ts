@@ -77,8 +77,21 @@ export class CarCard extends LitElement {
 
   protected render(): TemplateResult {
     const { fields } = this._config;
-    const hasMainInfo = !!fields?.main?.heading?.entity;
-    const mainInfoState = this.displayValue(fields?.main?.heading?.entity);
+
+    const topInfo = {
+      main: {
+        has: !!fields?.main?.heading?.entity,
+        state: this.displayValue(fields?.main?.heading?.entity),
+      },
+      subheading1: {
+        has: !!fields?.main?.subheading1?.entity,
+        state: this.displayValue(fields?.main?.subheading1?.entity),
+      },
+      subheading2: {
+        has: !!fields?.main?.subheading2?.entity,
+        state: this.displayValue(fields?.main?.subheading2?.entity),
+      },
+    }
 
     const hasStateOfCharge = !!fields?.battery?.state_of_charge?.entity;
     const stateOfChargeState = this.displayValue(fields?.battery?.state_of_charge?.entity);
@@ -104,15 +117,15 @@ export class CarCard extends LitElement {
       <ha-card .header=${this._config.title}>
         <div class="flex vertical card-content">
           <div class="grid vertical" id="main-info-container">
-            ${!hasMainInfo ? "" : html` <h1 id="main-info">${mainInfoState}</h1>`}
+            ${!topInfo.main.has ? "" : html` <h1 id="main-info">${topInfo.main.has}</h1>`}
             <div class="flex main-info-subtitle-container">
-              <p class="main-info-subtitle">23.000 km</p>
-              <p class="main-info-subtitle">1,5 years</p>
+              ${!topInfo.subheading1.has ? "" : html` <p class="main-info-subtitle">${topInfo.subheading1.state}</p>`}
+              ${!topInfo.subheading2.has ? "" : html` <p class="main-info-subtitle">${topInfo.subheading2.state}</p>`}
             </div>
           </div>
 
           ${!this._config?.image?.src ? "" : html` <img src=${this._config.image.src} width="100%" alt="Your Car" id="main-image" />`}
-          ${!isCharging
+          ${true
             ? ""
             : html`
                 <div class="flex horizontal">
