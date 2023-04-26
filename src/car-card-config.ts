@@ -40,6 +40,6 @@ export interface CarCardConfig extends LovelaceCardConfig {
   };
   image: {
     src: string;
-    max_height: number;
+    max_height?: number;
   };
 }
