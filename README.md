@@ -5,7 +5,7 @@
 
 # Car Card
 
-> A Custom Card for Home Assistant to display your different aspects of your car, for example its state of charge, range, etc... at a glance
+A Custom Card for Home Assistant to display your different aspects of your car, for example its state of charge, range, etc... at a glance
 
 ![Example Configuration](https://user-images.githubusercontent.com/61006057/234698226-0b408ec3-d7e9-4d19-820c-7f47d222702d.png)
 
