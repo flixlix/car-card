@@ -68,8 +68,8 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 
 | Name                | Type      | Description                                                                                                                                                                  |
 |---------------------| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| main | `object`  | Check [Main Field Configuration](#main-field-configuration). | 
-| battery | `string`  | Check [Battery Field Configuration](#battery-field-configuration). |
+| main | `object`  | Check [Main Field Configuration](#main-configuration). | 
+| battery | `object` | Check [Battery Field Configuration](#battery-configuration). |
 
 ##### Main Configuration
 
