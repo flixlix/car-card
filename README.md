@@ -3,6 +3,7 @@
 [![ko-fi support](https://img.shields.io/badge/support-me-ff5e5b?style=flat-square&logo=ko-fi)](https://ko-fi.com/flixlix)
 ![commit_activity](https://img.shields.io/github/commit-activity/y/flixlix/car-card?color=brightgreen&label=Commits&style=flat-square)
 
+
 # Car Card
 
 A Custom Card for Home Assistant to display your different states of your car, for example its state of charge, range, and more at a glance
